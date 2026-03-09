@@ -36,21 +36,12 @@ function sanitizeFileName(name, fallback) {}
 
 Manifest includes processedCount, totalParts, totalSizeBytes, and maxZipSizeBytes.
 
-Syntax check passed (node --check multipart_export_by_size.js).
 
 ```bash
 npm run export
 ```
 
-# 2. send_export_email.js , use signed manifesturl inside ""
-
-```bash
-
-npm run send-email -- "PASTE_SIGNED_URL"
-
-```
-
-# 3. Ako nemas manifesturl, generisi privremeni signed url za vec postojeci manifest
+# 2. Ako nemas manifesturl, generisi privremeni signed url za vec postojeci manifest from cludflare
 
 ```bash
 npm run manifest-url -- "exports/manifest_1234567890.json"
@@ -62,6 +53,14 @@ Optional custom expiry seconds (default 86400):
 
 ```bash
 npm run manifest-url -- "exports/manifest_1234567890.json" 3600
+```
+
+# 3. send_export_email.js , use signed manifesturl inside ""
+
+```bash
+
+npm run send-email -- "PASTE_SIGNED_URL"
+
 ```
 
 # UNSPLASH IMAGES FOR EMAIL
