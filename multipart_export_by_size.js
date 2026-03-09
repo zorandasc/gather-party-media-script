@@ -85,6 +85,7 @@ async function generateSignedUrl(bucketName, objectKey) {
   return getSignedUrl(s3, command, { expiresIn: SIGNED_URL_EXPIRY_SECONDS });
 }
 
+//Estimate size using head request
 async function estimateFileSize(fileUrl, mediaId) {
   try {
     const headRes = await fetch(fileUrl, { method: "HEAD" });
@@ -101,8 +102,8 @@ async function estimateFileSize(fileUrl, mediaId) {
   }
 }
 
-//  1. CREATE ZIP FILE
-//  2. UPLOAD TO CLOUDFLARE R2
+//  1. CREATE ZIP FILE FOR PART OF files
+//  2. UPLOAD ZIP PART TO CLOUDFLARE R2
 //  3. RETURN METATADATA TO PUT IN MANIFEST
 async function createAndUploadZip(files, partNumber) {
   //DEFINE NAME OF ZIPFILE
@@ -191,7 +192,11 @@ async function exportMediaZip() {
   await mongoClient.connect();
 
   try {
+    //1. connect to mongodb
     const db = mongoClient.db(DB_NAME);
+
+    //2. Cursor-based Mongo processing (for await ...)
+    // to avoid loading all media in memory.
     const cursor = db
       .collection("media")
       .find({}, { projection: { mediaId: 1, name: 1, contentType: 1 } });
@@ -216,7 +221,7 @@ async function exportMediaZip() {
         continue;
       }
 
-      //GET URL FROM CLUDFLARE FOR IMAGE AND VIDEO TO DOWNLOAD
+      //3. GET URL FROM CLUDFLARE FOR IMAGE AND VIDEO TO DOWNLOAD
       const fileUrl = buildMediaUrl(mediaId, contentType);
 
       //GET SIZE OF EACH FILE FROM HTML HEAD REQUEST
@@ -227,7 +232,7 @@ async function exportMediaZip() {
         currentFiles.length > 0
       ) {
         //IF MAX_SIZE REACHED
-        //UPLAD ZIP TO CLOUDFLARE
+        //UPLAD ZIP PART TO CLOUDFLARE
         //AND RETURN METADATA INFO TO PUT INTO MANIFEST
         const partInfo = await createAndUploadZip(currentFiles, partNumber);
 
